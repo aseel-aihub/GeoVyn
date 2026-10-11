@@ -55,6 +55,8 @@ h3 { font-size: 15px; font-weight: 600; margin: 22px 0 10px; }
   color: transparent;
   animation: flow 8s ease-in-out infinite alternate;
   padding-right: 2px;
+  display: inline-block;
+  -webkit-text-fill-color: transparent;
 }
 @keyframes flow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
 .sub { color: var(--muted); margin: 8px 0 0; }
