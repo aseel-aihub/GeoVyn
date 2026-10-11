@@ -1,0 +1,201 @@
+/* ============================================================
+   GeoVyn - style.css
+   Author : Aseel  (GitHub: aseel-aihub)
+   Copyright (c) 2026 Aseel. All rights reserved. See LICENSE.
+   ============================================================ */
+
+/* NOTE: main colors from the GeoVyn slides (dark navy + purple / blue / teal) */
+:root {
+  --bg: #0B1020;
+  --side: #0F1526;
+  --panel: #141B2E;
+  --panel-2: #182036;
+  --line: #262F48;
+  --text: #E9ECF5;
+  --muted: #98A2BD;
+  --purple: #7B5CE6;
+  --blue: #3E8ED6;
+  --teal: #16A79A;
+  --rose: #E2557A;
+  --amber: #E3A34B;
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Tahoma, "Geeza Pro", "Noto Sans Arabic", Arial, sans-serif;
+}
+
+/* NOTE: base page */
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 var(--font);
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: 28px 28px 20px;
+}
+h2 { font-size: 20px; font-weight: 600; margin: 26px 0 12px; }
+h3 { font-size: 15px; font-weight: 600; margin: 22px 0 10px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+[hidden] { display: none !important; }
+
+/* NOTE: keyboard focus is always visible */
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+
+/* NOTE: header and logo (same letter colors as the slides) */
+.head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+.logo { font-weight: 800; font-size: 46px; line-height: 1; letter-spacing: -1.5px; }
+/* NOTE: "Vyn" uses one smooth gradient (purple -> blue -> teal) instead of 3 separate colors.
+   the gradient is wider than the text and moves slowly, so the colors flow into each other */
+.logo .vyn {
+  background: linear-gradient(90deg, var(--purple), var(--blue), var(--teal), var(--blue), var(--purple));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: flow 8s ease-in-out infinite alternate;
+  padding-right: 2px;
+}
+@keyframes flow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+.sub { color: var(--muted); margin: 8px 0 0; }
+.ar { text-align: right; font-size: 22px; font-weight: 700; line-height: 1.5; }
+.ar small { display: block; font-size: 14px; font-weight: 400; color: var(--muted); }
+.rule { height: 3px; width: 140px; border-radius: 3px; margin: 18px 0 24px;
+        background: linear-gradient(90deg, var(--purple), var(--blue), var(--teal)); }
+
+/* NOTE: two column layout: settings panel + main area */
+.layout { display: grid; grid-template-columns: 270px 1fr; gap: 32px; align-items: start; }
+main { min-width: 0; }
+
+/* NOTE: settings panel */
+.panel { background: var(--side); border: 1px solid var(--line); border-radius: 12px; padding: 6px 18px 18px;
+         position: sticky; top: 16px; }
+.panel summary { cursor: pointer; font-weight: 600; padding: 10px 0; list-style: none; }
+.panel summary::-webkit-details-marker { display: none; }
+.panel summary::after { content: "\25BE"; float: right; color: var(--muted); }
+.panel details:not([open]) summary::after { content: "\25B8"; }
+.panel h3:first-of-type { margin-top: 6px; }
+.radio, .check { display: flex; gap: 8px; align-items: center; margin: 6px 0; cursor: pointer; }
+.range { display: block; margin: 10px 0 14px; }
+.range span { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.range b { color: var(--purple); }
+input[type="range"] { width: 100%; accent-color: var(--purple); }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--purple); width: 16px; height: 16px; }
+.agencies label { display: flex; gap: 8px; align-items: center; margin: 5px 0; font-size: 14px; cursor: pointer; }
+
+/* NOTE: buttons */
+.btn { font: inherit; font-size: 14px; color: #fff; background: var(--purple); border: 0; border-radius: 8px;
+       padding: 9px 14px; cursor: pointer; margin-top: 16px; }
+.btn:hover { filter: brightness(1.1); }
+.btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); margin-top: 10px; }
+.upload { margin: 8px 0; }
+.file { display: block; border: 1px dashed var(--line); border-radius: 8px; padding: 10px; font-size: 13px; color: var(--muted); }
+.file input { display: block; margin-top: 8px; width: 100%; color: var(--muted); font-size: 12px; }
+
+/* NOTE: notice boxes (fictional data, file problems) */
+.note { display: inline-block; font-size: 13px; color: var(--amber); border: 1px solid var(--line);
+        padding: 4px 10px; border-radius: 6px; margin-bottom: 18px; }
+.alert { border-radius: 10px; padding: 12px 14px; margin: 0 0 16px; font-size: 14px; }
+#stuck .alert { margin-top: 14px; }
+.alert.error { background: rgba(226, 85, 122, .12); border: 1px solid rgba(226, 85, 122, .4); }
+.alert.warn { background: rgba(227, 163, 75, .12); border: 1px solid rgba(227, 163, 75, .35); color: #F1C98F; }
+
+/* NOTE: KPI blocks with the colored side bar from the slides */
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 26px; }
+.kpis.three { grid-template-columns: repeat(3, 1fr); margin-top: 6px; }
+.kpi { border-left: 3px solid var(--purple); padding: 4px 0 4px 16px; }
+.kpi.kpi-teal { border-left-color: var(--teal); }
+.kpi .label { color: var(--muted); font-size: 14px; }
+.kpi .value { font-size: 32px; font-weight: 700; line-height: 1.25; }
+.kpi .from { color: var(--muted); font-size: 20px; font-weight: 500; }
+.kpi .hint { color: var(--muted); font-size: 12.5px; }
+
+/* NOTE: tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; overflow-x: auto; }
+.tabs button { font: inherit; font-size: 14.5px; color: var(--text); background: none; border: 0;
+               border-bottom: 2px solid transparent; padding: 10px 12px; cursor: pointer; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--purple); border-bottom-color: var(--purple); }
+
+/* NOTE: map tab */
+.map-tools { display: grid; grid-template-columns: auto auto 1fr; gap: 10px 24px; align-items: center; margin-bottom: 12px; }
+.seg { display: flex; gap: 16px; flex-wrap: wrap; }
+.seg label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.range.day { margin: 0; }
+.map { height: 520px; border-radius: 12px; border: 1px solid var(--line); background: #0d1324; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; color: var(--muted); font-size: 13px; margin: 10px 0; }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.dot, .sq { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.sq { border-radius: 2px; }
+.dash { display: inline-block; width: 18px; border-top: 2px dashed var(--rose); }
+.rose { background: var(--rose); }
+.purple { background: var(--purple); }
+.teal { background: var(--teal); }
+
+/* NOTE: dark style for map popups and tooltips */
+.leaflet-container { font: 13px/1.5 var(--font); background: #0d1324; }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip, .leaflet-tooltip {
+  background: var(--panel); color: var(--text); border: 1px solid var(--line); box-shadow: none; }
+.leaflet-tooltip::before { display: none; }
+.leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+.leaflet-control-attribution { background: rgba(11, 16, 32, .8) !important; color: var(--muted); }
+.leaflet-control-attribution a { color: var(--blue); }
+.leaflet-control-layers { background: var(--panel); color: var(--text); border: 1px solid var(--line) !important; }
+.leaflet-bar a { background: var(--panel); color: var(--text); border-color: var(--line); }
+
+/* NOTE: conflict and warning cards */
+.cols { display: grid; grid-template-columns: 3fr 2fr; gap: 28px; }
+.cols h2:first-child { margin-top: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--purple);
+        border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+.card.High { border-left-color: var(--rose); }
+.card.Medium, .card.warn { border-left-color: var(--amber); }
+.card.Low { border-left-color: var(--blue); }
+.card .top { display: flex; justify-content: space-between; gap: 12px; font-weight: 600; }
+.card .tag { font-size: 13px; white-space: nowrap; }
+.card.High .tag { color: var(--rose); }
+.card.Medium .tag { color: var(--amber); }
+.card.Low .tag { color: var(--blue); }
+.card .pair { margin: 6px 0 4px; font-size: 14.5px; }
+.card .pair span { color: var(--muted); }
+.card .meta { color: var(--muted); font-size: 13.5px; }
+
+/* NOTE: tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; background: var(--panel); }
+tr:last-child td { border-bottom: 0; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* NOTE: charts */
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { display: block; }
+.chart text { fill: var(--muted); font: 12px var(--font); }
+
+/* NOTE: assumptions list */
+.assumptions { padding-left: 20px; max-width: 80ch; }
+.assumptions li { margin: 6px 0; }
+
+/* NOTE: footer with the signature */
+.foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 13px;
+        border-top: 1px solid var(--line); margin-top: 36px; padding-top: 16px; }
+#signature { color: var(--text); }
+
+/* NOTE: tablets and phones */
+@media (max-width: 960px) {
+  body { padding: 20px 16px; }
+  .layout { grid-template-columns: 1fr; gap: 18px; }
+  .panel { position: static; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .kpis.three { grid-template-columns: 1fr; }
+  .cols { grid-template-columns: 1fr; }
+  .map-tools { grid-template-columns: 1fr; }
+  .map { height: 420px; }
+  .ar { text-align: left; }
+  .logo { font-size: 38px; }
+}
+
+/* NOTE: respect users who turn off motion */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

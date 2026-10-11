@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     GeoVyn - Spatial-Temporal Conflict Detection Engine
+     Author : Aseel  (GitHub: aseel-aihub)
+     Copyright (c) 2026 Aseel. All rights reserved. See LICENSE.
+     ============================================================ -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- NOTE: security rules for the browser (Content Security Policy):
+       only our own files can run, no outside scripts, no network requests,
+       images only from our files and the two map tile servers -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https://server.arcgisonline.com https://tile.openstreetmap.org; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'">
+  <!-- NOTE: send only the site name to the map servers, never the full page address -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
+  <meta name="author" content="Aseel (aseel-aihub)">
+  <meta name="description" content="GeoVyn: find clashes between road works and excavation permits before work starts, and get new dates that remove them.">
+  <title>GeoVyn | Spatial-Temporal Conflict Engine</title>
+  <!-- NOTE: small icon in the browser tab -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+  <!-- NOTE: map library is saved inside the project (no outside CDN) -->
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NOTE: header with the logo and the arabic tagline -->
+  <header class="head">
+    <div>
+      <div class="logo" aria-label="GeoVyn">Geo<span class="vyn">Vyn</span></div>
+      <p class="sub">Spatial-temporal conflict detection and rescheduling for city works</p>
+    </div>
+    <div class="ar" lang="ar" dir="rtl">
+      محرك التنبؤ وإدارة التعارضات المكانية والزمنية
+      <small>كشف التعارضات وحلها قبل بدء أول حفرة في المدينة</small>
+    </div>
+  </header>
+  <div class="rule" aria-hidden="true"></div>
+
+  <div class="layout">
+
+    <!-- NOTE: left panel with all settings (becomes a fold-out box on phones) -->
+    <aside class="panel">
+      <details id="settings" open>
+        <summary>Settings</summary>
+
+        <h3>Data</h3>
+        <label class="radio"><input type="radio" name="source" value="sample" checked> Sample data (fictional)</label>
+        <label class="radio"><input type="radio" name="source" value="upload"> Upload CSV</label>
+        <div id="upload-box" class="upload" hidden>
+          <label class="file">
+            <span>Choose a .csv file (max 1 MB)</span>
+            <input type="file" id="file" accept=".csv,text/csv">
+          </label>
+          <p id="file-name" class="muted"></p>
+        </div>
+        <button type="button" id="btn-template" class="btn ghost">Download CSV template</button>
+
+        <h3>Engine settings</h3>
+        <label class="range">
+          <span>Rest days between works on the same site <b id="gap-out">7</b></span>
+          <input type="range" id="gap" min="0" max="30" value="7">
+        </label>
+        <label class="range">
+          <span>Max days a work can move <b id="shift-out">90</b></span>
+          <input type="range" id="shift" min="7" max="120" value="90">
+        </label>
+        <label class="check"><input type="checkbox" id="delay" checked> Add expected delay to each work</label>
+
+        <h3>Show agencies</h3>
+        <div id="agencies" class="agencies"></div>
+        <p class="muted small">Hiding an agency only hides it from the views. Conflicts are always checked across all agencies.</p>
+      </details>
+    </aside>
+
+    <main>
+      <!-- NOTE: messages (fictional data note, file problems) -->
+      <div id="notice"></div>
+
+      <!-- NOTE: top KPIs, filled by app.js -->
+      <section id="kpis" class="kpis" aria-label="Key results"></section>
+
+      <!-- NOTE: tab buttons -->
+      <nav class="tabs" role="tablist" aria-label="Views">
+        <button type="button" role="tab" id="tab-map" aria-controls="view-map" aria-selected="true">Map</button>
+        <button type="button" role="tab" id="tab-conf" aria-controls="view-conf" aria-selected="false" tabindex="-1">Conflicts</button>
+        <button type="button" role="tab" id="tab-plan" aria-controls="view-plan" aria-selected="false" tabindex="-1">Rescheduling</button>
+        <button type="button" role="tab" id="tab-impact" aria-controls="view-impact" aria-selected="false" tabindex="-1">Traffic and fuel</button>
+        <button type="button" role="tab" id="tab-data" aria-controls="view-data" aria-selected="false" tabindex="-1">Data</button>
+      </nav>
+
+      <!-- NOTE: tab 1 - map -->
+      <section id="view-map" role="tabpanel" aria-labelledby="tab-map" class="view">
+        <div class="map-tools">
+          <div class="seg" role="radiogroup" aria-label="Plan">
+            <label><input type="radio" name="plan" value="before" checked> Current plan</label>
+            <label><input type="radio" name="plan" value="after"> After approved changes</label>
+          </div>
+          <label class="check"><input type="checkbox" id="all-days" checked> Show all dates</label>
+          <label class="range day">
+            <span>Works active on <b id="day-out"></b></span>
+            <input type="range" id="day" min="0" max="0" value="0" disabled>
+          </label>
+        </div>
+        <div id="map" class="map" role="application" aria-label="Map of works"></div>
+        <div class="legend">
+          <span><i class="dot rose"></i>In conflict</span>
+          <span><i class="dot purple"></i>Full road closure</span>
+          <span><i class="dot teal"></i>No conflict</span>
+          <span><i class="dash"></i>Linked conflict</span>
+        </div>
+        <p id="map-empty" class="muted" hidden>No works match the selected agencies or day.</p>
+      </section>
+
+      <!-- NOTE: tab 2 - conflicts -->
+      <section id="view-conf" role="tabpanel" aria-labelledby="tab-conf" class="view" hidden>
+        <div class="cols">
+          <div>
+            <h2 id="conf-title"></h2>
+            <div id="conf-list"></div>
+          </div>
+          <div>
+            <h2>Repeated digging</h2>
+            <div id="warn-list"></div>
+            <h2>By agency</h2>
+            <div id="agency-table"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTE: tab 3 - rescheduling -->
+      <section id="view-plan" role="tabpanel" aria-labelledby="tab-plan" class="view" hidden>
+        <h2>Suggested schedule changes</h2>
+        <p class="muted">High priority works keep their dates. Other works move to the closest date that clears the conflict,
+          but never sooner than the permit lead time. Untick a row to reject a move.</p>
+        <div id="moves" class="table-wrap"></div>
+        <div id="stuck"></div>
+        <h2>Timeline after approved changes</h2>
+        <div class="legend">
+          <span><i class="sq purple"></i>Unchanged</span>
+          <span><i class="sq teal"></i>Moved</span>
+          <span><i class="sq rose"></i>Still in conflict</span>
+        </div>
+        <div id="gantt" class="chart"></div>
+        <button type="button" id="btn-export" class="btn">Download new schedule (CSV)</button>
+      </section>
+
+      <!-- NOTE: tab 4 - traffic and fuel impact -->
+      <section id="view-impact" role="tabpanel" aria-labelledby="tab-impact" class="view" hidden>
+        <div id="impact-kpis" class="kpis three"></div>
+        <div class="legend">
+          <span><i class="sq rose"></i>Current plan</span>
+          <span><i class="sq teal"></i>After approved changes</span>
+        </div>
+        <div id="line" class="chart"></div>
+        <p class="muted small">Simple model: each active work adds load by closure type (full, partial, none) and every active
+          conflict adds extra load. Extra fuel use is scaled to the 29% upper bound from the KAPSARC Riyadh study.
+          Results are estimates and need real traffic data to be calibrated.</p>
+      </section>
+
+      <!-- NOTE: tab 5 - data and assumptions -->
+      <section id="view-data" role="tabpanel" aria-labelledby="tab-data" class="view" hidden>
+        <div id="file-notes"></div>
+        <div id="data-table" class="table-wrap"></div>
+        <h2>Assumptions</h2>
+        <ul id="assumptions" class="assumptions"></ul>
+      </section>
+    </main>
+  </div>
+
+  <!-- NOTE: footer with the author signature -->
+  <footer class="foot">
+    <span>GeoVyn: spatial-temporal conflict engine. Everything runs in your browser, no data leaves your device.</span>
+    <span id="signature"></span>
+  </footer>
+
+  <!-- NOTE: scripts in order: library, signature, data, engine, charts, app -->
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/signature.js"></script>
+  <script src="js/sample-data.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

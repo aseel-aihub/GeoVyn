@@ -1,0 +1,10 @@
+# GeoVyn | Author: Aseel (aseel-aihub)
+# NOTE: system and editor files that should never be uploaded
+.DS_Store
+__MACOSX/
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
+.env
+*.log

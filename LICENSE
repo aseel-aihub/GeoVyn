@@ -1,0 +1,23 @@
+GeoVyn - Proprietary License
+
+Copyright (c) 2026 Aseel (GitHub: aseel-aihub). All rights reserved.
+
+This source code, its design, and the GeoVyn idea (spatial-temporal conflict
+detection and automatic rescheduling of city works and excavation permits)
+are the property of the author.
+
+You MAY open and use the published website, and view this code for personal
+review and evaluation only.
+
+You MAY NOT, without written permission from the author:
+  - copy, modify, merge, publish, or distribute this code or any part of it;
+  - use this code or the GeoVyn idea in any product, service, or project;
+  - remove or change the author name, signature, or this notice.
+
+The software is provided "as is", without warranty of any kind.
+
+Third party: the map library in vendor/leaflet is Leaflet 1.9.4,
+(c) Volodymyr Agafonkin and contributors, under its own BSD-2-Clause license
+(see vendor/leaflet/LICENSE). This license does not cover it.
+
+Contact: aseelalqahtani.01@gmail.com
