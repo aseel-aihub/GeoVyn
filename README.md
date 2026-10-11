@@ -4,7 +4,7 @@
 
 محرك التنبؤ وإدارة التعارضات المكانية والزمنية
 
-An independent project that finds clashes between road works and excavation permits before work starts,
+An independent project that finds clashes between road projects and excavation permits before work starts,
 and suggests new dates that remove them.
 
 > Author: **Aseel** ([@aseel-aihub](https://github.com/aseel-aihub))
